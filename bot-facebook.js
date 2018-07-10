@@ -22,12 +22,47 @@ var controller = Botkit.facebookbot({
 });
 
 var bot = controller.spawn();
+
+  controller.middleware.normalize.use(function handleQuickReply (bot, message, next) {
+console.log("************** no middleware!");
+console.log(message);
+    if (message.attachments && message.attachments.length > 0) {
+	if (message.attachments[0].type == 'location') {
+	 console.log("***************** LOCATION!!!");
+	console.log(message.attachments[0].payload);
+      	message.text = message.attachments[0].payload.coordinates.lat+', '+message.attachments[0].payload.coordinates.long;
+controller.trigger('message_received', [bot, message]);
+//      	message.payload = message.attachments[0].payload;
+//      	message.type = 'facebook_location';
+	}
+    }
+    next();
+  });
+
 controller.hears('(.*)', 'message_received', function(bot, message) {
+console.log(message);
   if (message.watsonError) {
     console.log(message.watsonError);
     bot.reply(message, message.watsonError.description || message.watsonError.error);
+ /* } else if (message.watsonData && 'precisalocal' in message.watsonData.context) {
+console.log('precisa localizacao');
+bot.reply({
+	text: message.watsonData.output.text,
+	content_type: "location"
+});*/
   } else if (message.watsonData && 'output' in message.watsonData) {
+if ('precisalocal' in message.watsonData.context && message.watsonData.context.precisalocal === true) { 
+	bot.startConversation(message, function(err, convo) {
+		convo.ask({
+			text:message.watsonData.output.text,
+			quick_replies: [{content_type: 'location'}]
+		}, function(response, convo){ convo.successful(); });
+	});
+} else {
+console.log("********************* no bot");
+console.log(message);
     bot.reply(message, message.watsonData.output.text.join('\n'));
+}
   } else {
     console.log('Error: received message in unknown format. (Is your connection with Watson Conversation up and running?)');
     bot.reply(message, "I'm sorry, but for technical reasons I can't respond to your message");

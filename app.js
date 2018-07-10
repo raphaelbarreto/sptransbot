@@ -33,10 +33,22 @@ module.exports = function(app) {
 
   // Customize your Watson Middleware object's before and after callbacks.
   middleware.before = function(message, conversationPayload, callback) {
+console.log('**************** bef mensagem');
+	console.log(message);
+console.log('**************** bef payload');
+	console.log(conversationPayload);
+console.log('**************** bef callback');
+	console.log(callback);
     callback(null, conversationPayload);
   }
 
   middleware.after = function(message, conversationResponse, callback) {
+console.log('**************** mensagem');
+	console.log(message);
+console.log('**************** response');
+	console.log(conversationResponse);
+console.log('**************** callback');
+	console.log(callback);
     callback(null, conversationResponse);
   }
 };
